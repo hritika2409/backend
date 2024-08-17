@@ -4,34 +4,6 @@ import bodyParser from "body-parser";
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.get("/random", (req, res) => {
-  const randomIndex = Math.floor(Math.random() * products.length);
-  res.json(products[randomIndex]);
-});
-
-app.get("/products/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const foundProduct = products.find((product) => product.id === id);
-  res.json(foundProduct);
-});
-
-app.post("/products", (req, res) => {
-  const newProduct = {
-    id: products.length + 1,
-    productName: req.body.name,
-    productType: req.body.type,
-  };
-  products.push(newProduct);
-  console.log(products.slice(-1));
-  res.json(newProduct);
-});
-
-app.listen(port, () => {
-  console.log(`Successfully started server on port ${port}.`);
-});
-
 var products = [
   {
     id: 1,
@@ -109,3 +81,43 @@ var products = [
     productType: "Home & Living",
   },
 ];
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.get("/random", (req, res) => {
+  const randomIndex = Math.floor(Math.random() * products.length);
+  res.json(products[randomIndex]);
+});
+
+
+app.get("/products/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const foundProduct = products.find((product) => product.id === id);
+  if (foundProduct) {
+    res.json(foundProduct);
+  } else {
+    res.status(404).json({ error: "Product not found" });
+  }
+});
+
+app.post("/products", (req, res) => {
+  const { name, type } = req.body;
+  if (!name || !type) {
+    return res.status(400).json({ error: "Product name and type are required" });
+  }
+
+  const newProduct = {
+    id: products.length + 1,
+    productName: name,
+    productType: type,
+  };
+
+  products.push(newProduct);
+  console.log(products.slice(-1));
+  res.json(newProduct);
+});
+
+app.listen(port, () => {
+  console.log(`Successfully started server on port ${port}.`);
+});
